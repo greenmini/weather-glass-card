@@ -21,9 +21,17 @@ class WeatherGlassCardEditor extends HTMLElement {
   get _wind_entity() { return this._config?.wind_entity || ''; }
   get _uv_entity() { return this._config?.uv_entity || ''; }
   get _pollen_entity() { return this._config?.pollen_entity || ''; }
+  get _api_key() { return this._config?.api_key || ''; }
+  get _api_endpoint() { return this._config?.api_endpoint || 'https://api.openai.com/v1/chat/completions'; }
+  get _api_model() { return this._config?.api_model || 'gpt-3.5-turbo'; }
   get _cloud_coverage_entity() { return this._config?.cloud_coverage_entity || ''; }
   get _house_image() { return this._config?.house_image || ''; }
   get _room_badges() { return this._config?.room_badges || []; }
+  get _display_humidity() { return this._config?.display_humidity !== false; }
+  get _display_air_quality() { return this._config?.display_air_quality !== false; }
+  get _display_wind() { return this._config?.display_wind !== false; }
+  get _display_uv() { return this._config?.display_uv !== false; }
+  get _display_pollen() { return this._config?.display_pollen !== false; }
 
   _render() {
     if (!this.shadowRoot) return;
@@ -76,6 +84,19 @@ class WeatherGlassCardEditor extends HTMLElement {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
           gap: 16px;
+        }
+
+        .checkbox-group {
+          flex-direction: row;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+          width: 18px;
+          height: 18px;
+          border-radius: 4px;
+          accent-color: #667eea;
         }
 
         .form-group {
@@ -334,6 +355,26 @@ class WeatherGlassCardEditor extends HTMLElement {
           </div>
         </div>
 
+        <!-- AI Assistant 设置 -->
+        <div class="section">
+          <h3>AI 智能建议设置</h3>
+
+          <div class="form-group">
+            <label>API Key (留空使用本地规则)</label>
+            <input type="password" id="api_key" value="${this._api_key}" placeholder="sk-YOUR_API_KEY_HERE">
+          </div>
+
+          <div class="form-group">
+            <label>API Endpoint</label>
+            <input type="text" id="api_endpoint" value="${this._api_endpoint}" placeholder="https://api.openai.com/v1/chat/completions">
+          </div>
+
+          <div class="form-group">
+            <label>API Model</label>
+            <input type="text" id="api_model" value="${this._api_model}" placeholder="gpt-3.5-turbo">
+          </div>
+        </div>
+
         <!-- 房间徽章 -->
         <div class="section">
           <h3>房间温度徽章</h3>
@@ -364,6 +405,33 @@ class WeatherGlassCardEditor extends HTMLElement {
           </div>
 
           <button class="add-btn" onclick="this.closest('weather-glass-card-editor')._addBadge()">添加房间徽章</button>
+        </div>
+
+        <!-- 传感器显示设置 -->
+        <div class="section">
+          <h3>传感器显示设置</h3>
+          <div class="form-grid">
+            <div class="form-group checkbox-group">
+              <input type="checkbox" id="display_humidity" ?checked="${this._display_humidity}">
+              <label for="display_humidity">显示湿度</label>
+            </div>
+            <div class="form-group checkbox-group">
+              <input type="checkbox" id="display_air_quality" ?checked="${this._display_air_quality}">
+              <label for="display_air_quality">显示空气质量</label>
+            </div>
+            <div class="form-group checkbox-group">
+              <input type="checkbox" id="display_wind" ?checked="${this._display_wind}">
+              <label for="display_wind">显示风速</label>
+            </div>
+            <div class="form-group checkbox-group">
+              <input type="checkbox" id="display_uv" ?checked="${this._display_uv}">
+              <label for="display_uv">显示紫外线</label>
+            </div>
+            <div class="form-group checkbox-group">
+              <input type="checkbox" id="display_pollen" ?checked="${this._display_pollen}">
+              <label for="display_pollen">显示花粉</label>
+            </div>
+          </div>
         </div>
       </div>
     `;
@@ -418,6 +486,39 @@ class WeatherGlassCardEditor extends HTMLElement {
     this.shadowRoot.getElementById('house_image').addEventListener('change', (e) => {
       this._updateConfig({ ...this._config, house_image: e.target.value });
     });
+
+    this.shadowRoot.getElementById('api_key').addEventListener('change', (e) => {
+      this._updateConfig({ ...this._config, api_key: e.target.value });
+    });
+
+    this.shadowRoot.getElementById('api_endpoint').addEventListener('change', (e) => {
+      this._updateConfig({ ...this._config, api_endpoint: e.target.value });
+    });
+
+    this.shadowRoot.getElementById('api_model').addEventListener('change', (e) => {
+      this._updateConfig({ ...this._config, api_model: e.target.value });
+    });
+
+    // 绑定传感器显示设置事件
+    this.shadowRoot.getElementById('display_humidity').addEventListener('change', (e) => {
+      this._updateConfig({ ...this._config, display_humidity: e.target.checked });
+    });
+
+    this.shadowRoot.getElementById('display_air_quality').addEventListener('change', (e) => {
+      this._updateConfig({ ...this._config, display_air_quality: e.target.checked });
+    });
+
+    this.shadowRoot.getElementById('display_wind').addEventListener('change', (e) => {
+      this._updateConfig({ ...this._config, display_wind: e.target.checked });
+    });
+
+    this.shadowRoot.getElementById('display_uv').addEventListener('change', (e) => {
+      this._updateConfig({ ...this._config, display_uv: e.target.checked });
+    });
+
+    this.shadowRoot.getElementById('display_pollen').addEventListener('change', (e) => {
+      this._updateConfig({ ...this._config, display_pollen: e.target.checked });
+    });
   }
 
   // 事件处理方法
@@ -463,6 +564,18 @@ class WeatherGlassCardEditor extends HTMLElement {
 
   _handleHouseImageChange(e) {
     this._updateConfig({ ...this._config, house_image: e.target.value });
+  }
+
+  _handleApiKeyChange(e) {
+    this._updateConfig({ ...this._config, api_key: e.target.value });
+  }
+
+  _handleApiEndpointChange(e) {
+    this._updateConfig({ ...this._config, api_endpoint: e.target.value });
+  }
+
+  _handleApiModelChange(e) {
+    this._updateConfig({ ...this._config, api_model: e.target.value });
   }
 
   // 房间徽章方法

@@ -93,10 +93,23 @@ class WeatherGlassCard extends HTMLElement {
     this.lightningBolt = null;
     this.lightningTimer = 0;
     this.flashOpacity = 0;
+    this.apiKey = config.api_key || '';
+    this.apiEndpoint = config.api_endpoint || 'https://api.openai.com/v1/chat/completions';
+    this.apiModel = config.api_model || 'gpt-3.5-turbo';
+    this.aiCache = new Map(); // 缓存 AI 响应
+    this.lastApiCall = 0; // API 调用节流
+
+    // 新增：传感器显示配置
+    this.displayHumidity = config.display_humidity !== false;
+    this.displayAirQuality = config.display_air_quality !== false;
+    this.displayWind = config.display_wind !== false;
+    this.displayUV = config.display_uv !== false;
+    this.displayPollen = config.display_pollen !== false;
   }
 
   // 翻译方法
-  _t(key, repl = {}) {
+  _t(key, repl) {
+    repl = repl || {};
     let txt = TRANSLATIONS[this.lang]?.[key] || TRANSLATIONS['en'][key] || key;
     Object.keys(repl).forEach(k => {
       txt = txt.replace(new RegExp(`{${k}}`, 'g'), repl[k]);
@@ -203,11 +216,24 @@ class WeatherGlassCard extends HTMLElement {
     const advisorElement = this.shadowRoot.querySelector('[data-ai-advisor]');
     if (!advisorElement) return;
 
-    const advice = this.generateAIAdvice(weather, temp, wind, uv, airQuality, pollen);
-    advisorElement.innerHTML = advice;
+    // 如果配置了 API，使用 API 生成建议，否则使用规则引擎
+    if (this.apiKey && this.apiEndpoint) {
+      this.generateAIAdviceAPI(weather, temp, wind, uv, airQuality, pollen)
+        .then(advice => {
+          advisorElement.innerHTML = advice;
+        })
+        .catch(error => {
+          console.warn('AI API call failed, falling back to rule-based advice:', error);
+          const advice = this.generateAIAdviceRules(weather, temp, wind, uv, airQuality, pollen);
+          advisorElement.innerHTML = advice;
+        });
+    } else {
+      const advice = this.generateAIAdviceRules(weather, temp, wind, uv, airQuality, pollen);
+      advisorElement.innerHTML = advice;
+    }
   }
 
-  generateAIAdvice(weather, temp, wind, uv, airQuality, pollen) {
+  generateAIAdviceRules(weather, temp, wind, uv, airQuality, pollen) {
     if (!weather) return this._t('loading');
 
     const condition = weather.state;
@@ -300,6 +326,148 @@ class WeatherGlassCard extends HTMLElement {
     }
 
     return msg;
+  }
+
+  // API 基础的 AI 建议生成
+  async generateAIAdviceAPI(weather, temp, wind, uv, airQuality, pollen) {
+    // API 调用节流（每30秒最多一次）
+    const now = Date.now();
+    if (now - this.lastApiCall < 30000) {
+      return this._t('loading');
+    }
+    this.lastApiCall = now;
+
+    // 构建缓存键
+    const cacheKey = this.buildCacheKey(weather, temp, wind, uv, airQuality, pollen);
+    if (this.aiCache.has(cacheKey)) {
+      return this.aiCache.get(cacheKey);
+    }
+
+    try {
+      const prompt = this.buildAIPrompt(weather, temp, wind, uv, airQuality, pollen);
+      const response = await this.callAIAPI(prompt);
+      const advice = this.formatAIResponse(response);
+
+      // 缓存结果（最多缓存10个结果）
+      if (this.aiCache.size >= 10) {
+        const firstKey = this.aiCache.keys().next().value;
+        this.aiCache.delete(firstKey);
+      }
+      this.aiCache.set(cacheKey, advice);
+
+      return advice;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  buildCacheKey(weather, temp, wind, uv, airQuality, pollen) {
+    const key = [
+      weather?.state,
+      temp?.state,
+      wind?.state,
+      uv?.state,
+      airQuality?.state,
+      pollen?.state,
+      this.lang
+    ].join('|');
+    return btoa(key); // Base64 编码作为缓存键
+  }
+
+  buildAIPrompt(weather, temp, wind, uv, airQuality, pollen) {
+    const data = {
+      weather: weather?.state || 'unknown',
+      temperature: temp ? `${temp.state}${temp.attributes?.unit_of_measurement || '°C'}` : 'unknown',
+      humidity: this.hass.states[this.config.humidity_entity]?.state || 'unknown',
+      wind: wind ? `${wind.state} m/s` : 'unknown',
+      uv: uv ? uv.state : 'unknown',
+      airQuality: airQuality ? airQuality.state : 'unknown',
+      pollen: pollen ? pollen.state : 'unknown',
+      forecast: weather?.attributes?.forecast?.slice(0, 3) || [],
+      time: new Date().toLocaleTimeString(this.lang === 'zh' ? 'zh-CN' : 'en-US')
+    };
+
+    const language = this.lang === 'zh' ? '中文' : 'English';
+
+    return `You are an intelligent weather assistant. Based on the current weather data, provide a helpful, concise advice in ${language}. Consider safety, health, and daily activities.
+
+Current weather data:
+- Weather condition: ${data.weather}
+- Temperature: ${data.temperature}
+- Humidity: ${data.humidity}%
+- Wind speed: ${data.wind}
+- UV index: ${data.uv}
+- Air quality (AQI): ${data.airQuality}
+- Pollen level: ${data.pollen}
+- Time: ${data.time}
+
+${data.forecast.length > 0 ? `Next few hours forecast: ${data.forecast.map(f => `${f.condition} at ${new Date(f.datetime).getHours()}:00`).join(', ')}` : ''}
+
+Provide advice in this format:
+- Start with an emoji that represents the overall situation
+- Give 1-2 sentences of practical advice
+- Keep it under 100 characters
+- Use ${language} language
+
+Examples:
+English: "🌧️ Bring an umbrella - rain expected in 2 hours"
+Chinese: "🌧️ 预计2小时后下雨，请带伞出行"
+
+Your advice:`;
+  }
+
+  async callAIAPI(prompt) {
+    const response = await fetch(this.apiEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.apiKey}`
+      },
+      body: JSON.stringify({
+        model: this.apiModel,
+        messages: [
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        max_tokens: 150,
+        temperature: 0.7
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.choices[0]?.message?.content?.trim() || 'Unable to generate advice';
+  }
+
+  formatAIResponse(response) {
+    // 清理和格式化 API 响应
+    let cleanResponse = response.replace(/^["']|["']$/g, ''); // 移除引号
+    cleanResponse = cleanResponse.replace(/\n/g, ' '); // 移除换行符
+
+    // 根据语言确定样式类
+    const level = this.determineAdviceLevel(cleanResponse);
+
+    return `<div class="advice-item ${level}">${cleanResponse}</div>`;
+  }
+
+  determineAdviceLevel(advice) {
+    const dangerKeywords = ['danger', 'warning', 'alert', 'storm', 'thunder', '⚠️', '危险', '警报', '风暴'];
+    const warningKeywords = ['caution', 'careful', '注意', '小心', '🌧️', '🌨️', '☀️', '🥶', '🔥'];
+
+    const lowerAdvice = advice.toLowerCase();
+
+    if (dangerKeywords.some(keyword => lowerAdvice.includes(keyword.toLowerCase()))) {
+      return 'danger';
+    } else if (warningKeywords.some(keyword => lowerAdvice.includes(keyword.toLowerCase()))) {
+      return 'warning';
+    } else {
+      return 'info';
+    }
   }
 
   calculateWindChill(temp, windSpeed) {
@@ -595,35 +763,40 @@ class WeatherGlassCard extends HTMLElement {
           </div>
 
           <div class="metrics-grid">
-            <div class="metric-card">
-              <div class="metric-label">湿度</div>
-              <div class="metric-value" data-humidity>--%</div>
-              <div class="metric-icon">💧</div>
-            </div>
+            ${this.displayHumidity ? `
+              <div class="metric-card">
+                <div class="metric-label">湿度</div>
+                <div class="metric-value" data-humidity>--%</div>
+                <div class="metric-icon">💧</div>
+              </div>` : ''}
 
-            <div class="metric-card">
-              <div class="metric-label">空气质量</div>
-              <div class="metric-value" data-air-quality>--</div>
-              <div class="metric-icon">🌬️</div>
-            </div>
+            ${this.displayAirQuality ? `
+              <div class="metric-card">
+                <div class="metric-label">空气质量</div>
+                <div class="metric-value" data-air-quality>--</div>
+                <div class="metric-icon">🌬️</div>
+              </div>` : ''}
 
-            <div class="metric-card">
-              <div class="metric-label">风速</div>
-              <div class="metric-value" data-wind>-- m/s</div>
-              <div class="metric-icon">🌪️</div>
-            </div>
+            ${this.displayWind ? `
+              <div class="metric-card">
+                <div class="metric-label">风速</div>
+                <div class="metric-value" data-wind>-- m/s</div>
+                <div class="metric-icon">🌪️</div>
+              </div>` : ''}
 
-            <div class="metric-card">
-              <div class="metric-label">紫外线</div>
-              <div class="metric-value" data-uv>--</div>
-              <div class="metric-icon">☀️</div>
-            </div>
+            ${this.displayUV ? `
+              <div class="metric-card">
+                <div class="metric-label">紫外线</div>
+                <div class="metric-value" data-uv>--</div>
+                <div class="metric-icon">☀️</div>
+              </div>` : ''}
 
-            <div class="metric-card">
-              <div class="metric-label">花粉</div>
-              <div class="metric-value" data-pollen>--</div>
-              <div class="metric-icon">🌸</div>
-            </div>
+            ${this.displayPollen ? `
+              <div class="metric-card">
+                <div class="metric-label">花粉</div>
+                <div class="metric-value" data-pollen>--</div>
+                <div class="metric-icon">🌸</div>
+              </div>` : ''}
           </div>
 
           <div class="house-section">
@@ -1122,6 +1295,14 @@ class WeatherGlassCard extends HTMLElement {
   static getStubConfig() {
     return {
       language: "zh", // 支持 "en" 或 "zh"
+      api_key: '', // 用户提供的 API Key
+      api_endpoint: 'https://api.openai.com/v1/chat/completions', // API 端点
+      api_model: 'gpt-3.5-turbo', // API 模型
+      display_humidity: true,
+      display_air_quality: true,
+      display_wind: true,
+      display_uv: true,
+      display_pollen: true,
       title: '气候监控',
       weather_entity: 'weather.home',
       temperature_entity: 'sensor.living_room_temperature',
