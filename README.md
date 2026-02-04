@@ -1,8 +1,19 @@
-# 天气 Glassmorphism 卡片 v2.0
+# 天气 Glassmorphism 卡片 v2.1
 
 一款先进的 Home Assistant Lovelace 卡片，采用现代 glassmorphism 设计风格，专为监控家庭气候、天气状况和环境危害而设计。
 
 ## ✨ 新增功能 (v2.1 - 融合 U-House 卡片)
+
+### 🧠 API驱动AI智能提醒
+- **AI生成建议**: 支持OpenAI等API服务生成个性化天气建议
+- **智能缓存**: 避免过度API调用，提升性能
+- **自动回退**: API不可用时自动使用规则引擎
+- **多语言支持**: 英文和中文叙述
+
+### 🎛️ 可配置传感器显示
+- **自定义显示**: 用户可选择显示湿度、空气质量、风速、紫外线、花粉等传感器
+- **简洁UI**: 根据选择的传感器动态调整布局
+- **高级设计**: 玻璃拟态风格，响应式布局
 
 ### 🧠 增强 AI Smart Advisor
 - **智能优先级系统**: 基于危险程度自动排序建议
@@ -71,6 +82,7 @@ resources:
 
 | 选项 | 类型 | 必需 | 默认值 | 说明 |
 |------|------|------|--------|------|
+| `language` | string | ❌ | zh | 语言设置 ("en" 或 "zh") |
 | `title` | string | ❌ | 气候监控 | 卡片标题 |
 | `weather_entity` | string | ✅ | - | 天气实体 ID |
 | `temperature_entity` | string | ✅ | - | 温度传感器实体 ID |
@@ -82,21 +94,47 @@ resources:
 | `cloud_coverage_entity` | string | ❌ | - | 云覆盖实体 ID |
 | `house_image` | string | ❌ | - | 房子图像 URL |
 | `room_badges` | array | ❌ | - | 房间温度徽章配置 |
+| `api_key` | string | ❌ | - | OpenAI API密钥（用于AI建议） |
+| `api_endpoint` | string | ❌ | https://api.openai.com/v1/chat/completions | API端点 |
+| `api_model` | string | ❌ | gpt-3.5-turbo | AI模型名称 |
+| `display_humidity` | boolean | ❌ | true | 是否显示湿度传感器 |
+| `display_air_quality` | boolean | ❌ | true | 是否显示空气质量传感器 |
+| `display_wind` | boolean | ❌ | true | 是否显示风速传感器 |
+| `display_uv` | boolean | ❌ | true | 是否显示紫外线传感器 |
+| `display_pollen` | boolean | ❌ | true | 是否显示花粉传感器 |
 
 ### 完整配置示例
 ```yaml
 type: custom:weather-glass-card
 language: "zh"  # "en" 或 "zh"
 title: 我的家庭气候
+
+# AI 智能提醒配置 (可选)
+api_key: "sk-your-openai-api-key-here"
+api_endpoint: "https://api.openai.com/v1/chat/completions"
+api_model: "gpt-3.5-turbo"
+
+# 传感器显示配置
+display_humidity: true
+display_air_quality: true
+display_wind: true
+display_uv: true
+display_pollen: true
+
+# 必需实体
 weather_entity: weather.home
 temperature_entity: sensor.living_room_temperature
 humidity_entity: sensor.living_room_humidity
+
+# 可选实体
 air_quality_entity: sensor.air_quality_index
 wind_entity: sensor.wind_speed
 uv_entity: sensor.uv_index
 pollen_entity: sensor.pollen_count
 cloud_coverage_entity: sensor.cloud_coverage
 house_image: /local/house.jpg
+
+# 房间温度徽章
 room_badges:
   - name: "客厅"
     temperature_entity: "sensor.living_room_temperature"
@@ -124,6 +162,8 @@ room_badges:
 
 3. **界面功能**
    - **基本设置**: 选择语言（中文/English）、卡片标题
+   - **AI 智能提醒设置**: 配置API密钥、端点和模型（可选）
+   - **传感器显示设置**: 选择要显示的传感器（湿度、空气质量、风速、紫外线、花粉）
    - **必需实体**: 配置天气、温度、湿度传感器
    - **可选实体**: 添加空气质量、风速、紫外线等传感器
    - **视觉设置**: 设置房子图像
@@ -135,11 +175,24 @@ room_badges:
 - 选择语言（中文/English）
 - 设置卡片标题
 
-#### 步骤 2: 实体配置
+#### 步骤 2: AI 智能提醒设置（可选）
+- 输入您的OpenAI API密钥（留空使用本地规则引擎）
+- 设置API端点（默认OpenAI）
+- 选择AI模型（默认GPT-3.5-turbo）
+
+#### 步骤 3: 传感器显示设置
+- 勾选您想要显示的传感器：
+  - 💧 湿度
+  - 🌬️ 空气质量
+  - 🌪️ 风速
+  - ☀️ 紫外线
+  - 🌸 花粉
+
+#### 步骤 4: 实体配置
 - 从下拉菜单中选择相应的传感器实体
 - 必需实体会标有红色星号 *
 
-#### 步骤 3: 房间徽章（可选）
+#### 步骤 5: 房间徽章（可选）
 - 点击"添加房间徽章"为房子图像添加温度显示
 - 为每个房间设置：
   - 房间名称

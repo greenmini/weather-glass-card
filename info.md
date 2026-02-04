@@ -1,6 +1,22 @@
-# Weather Glass Card
+# Weather Glass Card v2.1
 
 一款先进的 Home Assistant Lovelace 卡片，采用现代 glassmorphism 设计风格，专为监控家庭气候、天气状况和环境危害而设计。
+
+## ✨ 新特性
+
+🧠 **API驱动AI智能提醒**
+- 支持OpenAI等API服务生成个性化建议
+- 智能缓存和节流机制
+- 自动回退到规则引擎
+
+🎛️ **可配置传感器显示**
+- 用户可选择显示的传感器（湿度、空气质量、风速、紫外线、花粉）
+- 动态布局调整
+- 简洁高级的UI设计
+
+🌐 **多语言支持**
+- 英文和中文界面
+- 完整的本地化
 
 ## 特性
 
@@ -26,6 +42,9 @@
 🌡️ **Room Badges**
 - 可定位的温度徽章
 
+⚡ **闪电风暴效果**
+- 雷暴天气的真实闪电动画
+
 ## 安装
 
 通过 HACS 安装：
@@ -38,9 +57,31 @@
 
 ```yaml
 type: custom:weather-glass-card
+language: "zh"  # "en" 或 "zh"
+title: "气候监控"
+
+# AI 设置 (可选)
+api_key: "your-openai-api-key"
+api_endpoint: "https://api.openai.com/v1/chat/completions"
+api_model: "gpt-3.5-turbo"
+
+# 传感器显示设置
+display_humidity: true
+display_air_quality: true
+display_wind: true
+display_uv: true
+display_pollen: true
+
+# 必需实体
 weather_entity: weather.home
 temperature_entity: sensor.temperature
 humidity_entity: sensor.humidity
+
+# 可选实体
+air_quality_entity: sensor.air_quality
+wind_entity: sensor.wind_speed
+uv_entity: sensor.uv_index
+pollen_entity: sensor.pollen_count
 ```
 
-更多配置选项请参考文档。
+更多配置选项请参考完整文档。

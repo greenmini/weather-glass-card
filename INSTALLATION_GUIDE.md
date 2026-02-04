@@ -1,12 +1,32 @@
-# 天气 Glassmorphism 卡片 - 完整使用指南 v2.0
+# 天气 Glassmorphism 卡片 - 完整使用指南 v2.1
 
 ## 📋 目录
 1. [快速开始](#快速开始)
 2. [详细安装](#详细安装)
 3. [配置指南](#配置指南)
-4. [实体设置](#实体设置)
-5. [高级定制](#高级定制)
-6. [故障排除](#故障排除)
+4. [AI智能提醒设置](#ai智能提醒设置)
+5. [传感器显示配置](#传感器显示配置)
+6. [实体设置](#实体设置)
+7. [高级定制](#高级定制)
+8. [故障排除](#故障排除)
+
+---
+
+## ✨ 新功能 (v2.1)
+
+### 🧠 API驱动AI智能提醒
+- 支持OpenAI等API服务生成个性化天气建议
+- 智能缓存机制，避免过度API调用
+- API不可用时自动回退到本地规则引擎
+
+### 🎛️ 可配置传感器显示
+- 用户可选择显示湿度、空气质量、风速、紫外线、花粉等传感器
+- 动态网格布局，根据选择的传感器自动调整
+- 提供更简洁、更个性化的界面
+
+### 🌐 增强多语言支持
+- 完整的英文和中文本地化
+- AI建议支持双语输出
 
 ---
 
@@ -126,6 +146,7 @@ air_quality_entity: sensor.air_quality_index
 | 参数 | 类型 | 必需 | 说明 | 示例 |
 |------|------|------|------|------|
 | `type` | string | ✅ | 卡片类型 | `custom:weather-glass-card` |
+| `language` | string | ❌ | 语言设置 | `"zh"` 或 `"en"` |
 | `title` | string | ❌ | 卡片标题 | `气候监控` |
 | `weather_entity` | string | ✅ | 天气实体 | `weather.home` |
 | `temperature_entity` | string | ✅ | 温度传感器 | `sensor.temperature` |
@@ -137,6 +158,14 @@ air_quality_entity: sensor.air_quality_index
 | `cloud_coverage_entity` | string | ❌ | 云覆盖 | `sensor.cloud_coverage` |
 | `house_image` | string | ❌ | 房子图像 | `/local/house.jpg` |
 | `room_badges` | array | ❌ | 房间徽章 | 见下文 |
+| `api_key` | string | ❌ | OpenAI API密钥 | `sk-...` |
+| `api_endpoint` | string | ❌ | API端点 | `https://api.openai.com/v1/chat/completions` |
+| `api_model` | string | ❌ | AI模型 | `gpt-3.5-turbo` |
+| `display_humidity` | boolean | ❌ | 显示湿度 | `true` |
+| `display_air_quality` | boolean | ❌ | 显示空气质量 | `true` |
+| `display_wind` | boolean | ❌ | 显示风速 | `true` |
+| `display_uv` | boolean | ❌ | 显示紫外线 | `true` |
+| `display_pollen` | boolean | ❌ | 显示花粉 | `true` |
 
 ### 房间徽章配置
 
@@ -155,16 +184,35 @@ room_badges:
 ### 完整配置示例
 ```yaml
 type: custom:weather-glass-card
+language: "zh"  # "en" 或 "zh"
 title: 我的家庭气候
+
+# AI 智能提醒设置 (可选)
+api_key: "sk-your-openai-api-key-here"
+api_endpoint: "https://api.openai.com/v1/chat/completions"
+api_model: "gpt-3.5-turbo"
+
+# 传感器显示设置
+display_humidity: true
+display_air_quality: true
+display_wind: true
+display_uv: true
+display_pollen: true
+
+# 必需实体
 weather_entity: weather.home
 temperature_entity: sensor.living_room_temperature
 humidity_entity: sensor.living_room_humidity
+
+# 可选实体
 air_quality_entity: sensor.air_quality_index
 wind_entity: sensor.wind_speed
 uv_entity: sensor.uv_index
 pollen_entity: sensor.pollen_count
 cloud_coverage_entity: sensor.cloud_coverage
 house_image: /local/house.jpg
+
+# 房间温度徽章
 room_badges:
   - name: "客厅"
     temperature_entity: "sensor.living_room_temperature"
@@ -175,6 +223,75 @@ room_badges:
     x: 70
     y: 35
 ```
+
+---
+
+## AI智能提醒设置
+
+### 配置AI API（可选）
+
+如果您想使用AI生成个性化的天气建议，可以配置OpenAI或其他兼容的API服务：
+
+```yaml
+type: custom:weather-glass-card
+# ... 其他配置 ...
+
+# AI 设置
+api_key: "sk-your-openai-api-key-here"
+api_endpoint: "https://api.openai.com/v1/chat/completions"
+api_model: "gpt-3.5-turbo"
+```
+
+### AI配置选项
+
+| 参数 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `api_key` | string | - | OpenAI API密钥 |
+| `api_endpoint` | string | `https://api.openai.com/v1/chat/completions` | API端点URL |
+| `api_model` | string | `gpt-3.5-turbo` | AI模型名称 |
+
+### AI功能说明
+
+- **智能缓存**: 相同天气状况下避免重复API调用
+- **节流控制**: 每30秒最多一次API调用
+- **自动回退**: API不可用时使用本地规则引擎
+- **多语言支持**: 根据设置的语言生成相应语言的建议
+
+---
+
+## 传感器显示配置
+
+### 选择显示的传感器
+
+您可以自定义卡片上显示哪些传感器，实现更简洁的界面：
+
+```yaml
+type: custom:weather-glass-card
+# ... 其他配置 ...
+
+# 传感器显示设置
+display_humidity: true        # 显示湿度
+display_air_quality: true     # 显示空气质量
+display_wind: true           # 显示风速
+display_uv: true             # 显示紫外线
+display_pollen: true         # 显示花粉
+```
+
+### 传感器显示选项
+
+| 参数 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `display_humidity` | boolean | `true` | 是否显示湿度传感器 |
+| `display_air_quality` | boolean | `true` | 是否显示空气质量传感器 |
+| `display_wind` | boolean | `true` | 是否显示风速传感器 |
+| `display_uv` | boolean | `true` | 是否显示紫外线传感器 |
+| `display_pollen` | boolean | `true` | 是否显示花粉传感器 |
+
+### 效果说明
+
+- **动态布局**: 卡片会根据选择的传感器自动调整网格布局
+- **响应式设计**: 保持在不同屏幕尺寸下的良好显示效果
+- **个性化界面**: 只显示您关心的传感器数据
 
 ---
 
