@@ -9,8 +9,8 @@
 2. 将以下文件上传到仓库：
    - `hacs.json`
    - `info.md`
-   - `weather-card.js`
-   - `weather-card-editor.js`
+   - `weather-glass-card.js`
+   - `weather-glass-card-editor.js`
    - `README.md`
    - `INSTALLATION_GUIDE.md`
 
