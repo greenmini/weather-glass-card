@@ -1,40 +1,33 @@
-# 天气 Glassmorphism 卡片 v2.1
+# 天气 Glassmorphism 卡片 v2.2
 
-一款先进的 Home Assistant Lovelace 卡片，采用现代 glassmorphism 设计风格，专为监控家庭气候、天气状况和环境危害而设计。
+一款简洁高效的 Home Assistant Lovelace 卡片，采用现代 glassmorphism 设计风格，专为监控家庭气候和天气状况而设计。
 
-## ✨ 新增功能 (v2.1 - 融合 U-House 卡片)
+## ✨ 核心功能
 
-### 🧠 API驱动AI智能提醒
-- **AI生成建议**: 支持OpenAI等API服务生成个性化天气建议
-- **智能缓存**: 避免过度API调用，提升性能
-- **自动回退**: API不可用时自动使用规则引擎
-- **多语言支持**: 英文和中文叙述
+### 🧠 智能规则引擎
+- **规则基础建议**: 基于预设规则生成实用的天气建议
+- **多条件分析**: 综合考虑温度、风速、紫外线、空气质量、花粉等因素
+- **优先级排序**: 危险状况优先提醒，安全建议次之
 
-### 🎛️ 可配置传感器显示
-- **自定义显示**: 用户可选择显示湿度、空气质量、风速、紫外线、花粉等传感器
-- **简洁UI**: 根据选择的传感器动态调整布局
-- **高级设计**: 玻璃拟态风格，响应式布局
+### 🎨 玻璃拟态设计
+- **现代化视觉**: 毛玻璃效果和优雅的渐变
+- **响应式布局**: 自适应不同屏幕尺寸
+- **流畅动画**: 粒子效果和动态天气渲染
 
-### 🧠 增强 AI Smart Advisor
-- **智能优先级系统**: 基于危险程度自动排序建议
-- **上下文感知**: 考虑天气预报、当前状况和未来变化
-- **多语言支持**: 英文和中文叙述
-- **实时分析**: 动态响应传感器数据变化
+### 🌡️ 全面传感器监控
+- **固定显示**: 湿度、空气质量、风速、紫外线、花粉传感器
+- **实时更新**: 所有数据实时同步显示
+- **智能着色**: 根据数值自动调整颜色显示
 
-### 🌩️ 闪电风暴效果
-- **真实闪电**: 雷暴天气时的随机闪电效果
-- **风暴增强**: 雷暴时雨势更强，风影响更明显
-- **视觉冲击**: 动态闪电路径和亮度闪烁
+### 🏠 房屋温度覆盖
+- **房间徽章**: 在房屋图像上显示各房间温度
+- **自定义位置**: 可配置徽章位置和房间名称
+- **视觉集成**: 与天气动画无缝融合
 
-### 🌐 多语言支持
-- **英文 (en)**: 默认语言
-- **中文 (zh)**: 完整的中文翻译
-- **可扩展**: 易于添加更多语言
-
-### 🎯 智能状态检测
-- **健康优先**: 空气质量和花粉警报优先级最高
-- **安全第一**: 风暴和极端天气立即警告
-- **生活建议**: 基于温度、风速的实用建议
+### 🌅 日夜循环系统
+- **时间感知**: 根据时间自动调整色调
+- **环境光效**: 日出日落时的光线变化
+- **氛围营造**: 营造真实的昼夜氛围
 
 ## 特性
 
@@ -109,24 +102,12 @@ type: custom:weather-glass-card
 language: "zh"  # "en" 或 "zh"
 title: 我的家庭气候
 
-# AI 智能提醒配置 (可选)
-api_key: "sk-your-openai-api-key-here"
-api_endpoint: "https://api.openai.com/v1/chat/completions"
-api_model: "gpt-3.5-turbo"
-
-# 传感器显示配置
-display_humidity: true
-display_air_quality: true
-display_wind: true
-display_uv: true
-display_pollen: true
-
 # 必需实体
 weather_entity: weather.home
 temperature_entity: sensor.living_room_temperature
 humidity_entity: sensor.living_room_humidity
 
-# 可选实体
+# 可选实体 (所有传感器都会自动显示)
 air_quality_entity: sensor.air_quality_index
 wind_entity: sensor.wind_speed
 uv_entity: sensor.uv_index

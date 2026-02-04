@@ -1,86 +1,3 @@
-const TRANSLATIONS = {
-  en: {
-    loading: "Analyzing environmental data...",
-    home_median: "Home",
-
-    // Conditions
-    clear_night: "Clear Night", cloudy: "Cloudy", fog: "Fog", hail: "Hail",
-    lightning: "Thunderstorm", lightning_rainy: "Thunderstorm & Rain",
-    partlycloudy: "Partly Cloudy", pouring: "Pouring Rain", rainy: "Rainy",
-    snowy: "Snowy", sunny: "Sunny", windy: "Windy",
-
-    // --- AI NARRATIVES ---
-
-    // 1. DANGER / STORM
-    alert_storm: "⚠️ CRITICAL ALERT: A storm with lightning is active nearby. Strong winds and heavy rain are expected. Please secure loose objects outside and stay indoors for safety.",
-
-    // 2. HEALTH (AQI / POLLEN)
-    alert_aqi_bad: "😷 SMOG ALERT: Air quality is critical (PM2.5: {val}). Prolonged exposure is dangerous. Keep windows closed and run your air purifier.",
-    alert_aqi_mod: "😶 AIR QUALITY WARNING: PM2.5 levels are elevated ({val}). Sensitive groups should limit outdoor exertion today.",
-    alert_pollen: "🤧 ALLERGY ALERT: High pollen concentration detected. If you suffer from allergies, keep windows shut and have your medication ready.",
-
-    // 3. FORECAST (FUTURE RAIN/SNOW)
-    advice_rain_soon: "☂️ PLAN AHEAD: Rain is approaching and expected around {time} (approx. {val} mm). Don't leave without an umbrella.",
-    advice_snow_soon: "❄️ WINTER ALERT: Snowfall is expected around {time}. Road conditions may deteriorate rapidly. Drive with caution.",
-
-    // 4. CURRENT WEATHER
-    advice_rain_now: "🌧️ CURRENTLY RAINING: Intensity is {val} mm/h. Wet surfaces and reduced visibility. Drive safely and wear waterproof gear.",
-    advice_snow_now: "🌨️ SNOWING: Snow is falling right now. Enjoy the view, but dress warmly if you head out.",
-
-    // 5. UV / SUN
-    alert_uv_high: "☀️ HIGH UV RADIATION: The UV Index is {val}. Unprotected skin can burn quickly. Use sunscreen and wear sunglasses if you go out.",
-
-    // 6. TEMPERATURE + WIND (Wind Chill)
-    advice_cold_wind: "🥶 WIND CHILL WARNING: It's {val}°C, but the strong wind makes it feel much colder. Wear windproof layers and a hat.",
-    advice_cold: "🧣 COLD WEATHER: Outside temperature is {val}°C. It's chilly—make sure to zip up your jacket and keep warm.",
-
-    advice_hot: "🔥 HEAT ADVISORY: Temperatures have reached {val}°C. Avoid strenuous activity in direct sunlight and drink plenty of water.",
-    advice_nice: "😎 COMFORTABLE CONDITIONS: Weather is stable at {val}°C with moderate wind. Great time for a walk or airing out the house.",
-
-    advice_gaming: "🎮 GAMING MODE: Immersive lighting active. Notifications silenced.",
-  },
-  zh: {
-    loading: "正在分析环境数据...",
-    home_median: "室内",
-
-    // 天气状况
-    clear_night: "晴朗夜晚", cloudy: "多云", fog: "雾", hail: "冰雹",
-    lightning: "雷暴", lightning_rainy: "雷暴雨",
-    partlycloudy: "局部多云", pouring: "大雨", rainy: "雨",
-    snowy: "雪", sunny: "晴朗", windy: "大风",
-
-    // --- AI 叙述 ---
-
-    // 1. 危险/风暴
-    alert_storm: "⚠️ 严重警报：附近有雷暴天气。预计会有强风和大雨。请固定室外物品并留在室内。",
-
-    // 2. 健康 (空气质量/花粉)
-    alert_aqi_bad: "😷 雾霾警报：空气质量严重污染 (PM2.5: {val})。长时间暴露很危险。请关闭窗户并运行空气净化器。",
-    alert_aqi_mod: "😶 空气质量警告：PM2.5水平升高 ({val})。敏感人群应限制户外活动。",
-    alert_pollen: "🤧 过敏警报：检测到高浓度花粉。如果您对花粉过敏，请关闭窗户并准备好药物。",
-
-    // 3. 预报 (即将到来的雨雪)
-    advice_rain_soon: "☂️ 提前规划：雨水即将到来，预计在{time}左右 (约{val}mm)。出门请带伞。",
-    advice_snow_soon: "❄️ 冬季警报：预计在{time}左右开始下雪。道路条件可能迅速恶化。请谨慎驾驶。",
-
-    // 4. 当前天气
-    advice_rain_now: "🌧️ 正在下雨：强度为{val}mm/h。路面湿滑，能见度降低。请安全驾驶并穿着防水装备。",
-    advice_snow_now: "🌨️ 正在下雪：雪正在落下。欣赏美景，但出门请穿暖。",
-
-    // 5. 紫外线/阳光
-    alert_uv_high: "☀️ 高紫外线辐射：紫外线指数为{val}。未受保护的皮肤可能被晒伤。请使用防晒霜和太阳镜。",
-
-    // 6. 温度+风 (风寒效应)
-    advice_cold_wind: "🥶 风寒警告：温度为{val}°C，但强风使体感温度更低。请穿着防风衣物和帽子。",
-    advice_cold: "🧣 寒冷天气：室外温度为{val}°C。天气寒冷，请确保拉上夹克拉链保暖。",
-
-    advice_hot: "🔥 热浪警告：温度已达到{val}°C。请避免在阳光直射下剧烈活动，并多喝水。",
-    advice_nice: "😎 舒适条件：天气稳定，温度为{val}°C，风力适中。适合散步或开窗通风。",
-
-    advice_gaming: "🎮 游戏模式：沉浸式照明已激活。通知已静音。",
-  }
-};
-
 class WeatherGlassCard extends HTMLElement {
   setConfig(config) {
     this.config = config;
@@ -89,32 +6,55 @@ class WeatherGlassCard extends HTMLElement {
     this.particles = [];
     this.ambientLights = [];
     this.gamingMode = false;
-    this.lang = config.language || 'en'; // 语言设置
-    this.lightningBolt = null;
-    this.lightningTimer = 0;
-    this.flashOpacity = 0;
-    this.apiKey = config.api_key || '';
-    this.apiEndpoint = config.api_endpoint || 'https://api.openai.com/v1/chat/completions';
-    this.apiModel = config.api_model || 'gpt-3.5-turbo';
-    this.aiCache = new Map(); // 缓存 AI 响应
-    this.lastApiCall = 0; // API 调用节流
-
-    // 新增：传感器显示配置
-    this.displayHumidity = config.display_humidity !== false;
-    this.displayAirQuality = config.display_air_quality !== false;
-    this.displayWind = config.display_wind !== false;
-    this.displayUV = config.display_uv !== false;
-    this.displayPollen = config.display_pollen !== false;
   }
 
-  // 翻译方法
-  _t(key, repl) {
-    repl = repl || {};
-    let txt = TRANSLATIONS[this.lang]?.[key] || TRANSLATIONS['en'][key] || key;
-    Object.keys(repl).forEach(k => {
-      txt = txt.replace(new RegExp(`{${k}}`, 'g'), repl[k]);
-    });
-    return txt;
+  set hass(hass) {
+    this._hass = hass;
+    this.update();
+  }
+
+  get hass() {
+    return this._hass;
+  }
+
+  update() {
+    if (!this.hass) return;
+
+    const {
+      weather_entity,
+      temperature_entity,
+      humidity_entity,
+      air_quality_entity,
+      wind_entity,
+      uv_entity,
+      pollen_entity,
+      cloud_coverage_entity,
+      house_image,
+      room_badges
+    } = this.config;
+
+    const weatherState = weather_entity ? this.hass.states[weather_entity] : null;
+    const tempState = temperature_entity ? this.hass.states[temperature_entity] : null;
+    const humidityState = humidity_entity ? this.hass.states[humidity_entity] : null;
+    const airQualityState = air_quality_entity ? this.hass.states[air_quality_entity] : null;
+    const windState = wind_entity ? this.hass.states[wind_entity] : null;
+    const uvState = uv_entity ? this.hass.states[uv_entity] : null;
+    const pollenState = pollen_entity ? this.hass.states[pollen_entity] : null;
+    const cloudCoverageState = cloud_coverage_entity ? this.hass.states[cloud_coverage_entity] : null;
+
+    if (!this.shadowRoot) {
+      this.attachShadow({ mode: 'open' });
+      this.shadowRoot.innerHTML = this.getHtml();
+      this.initializeCanvas();
+      this.startAnimation();
+      this.setupEventListeners();
+    }
+
+    this.updateValues(weatherState, tempState, humidityState, airQualityState, windState, uvState, pollenState, cloudCoverageState);
+    this.updateAIAdvisor(weatherState, tempState, windState, uvState, airQualityState, pollenState);
+    this.updateWeatherEngine(weatherState, windState, cloudCoverageState);
+    this.updateDayNightCycle(weatherState);
+    this.updateRoomBadges(room_badges);
   }
 
   set hass(hass) {
@@ -216,258 +156,60 @@ class WeatherGlassCard extends HTMLElement {
     const advisorElement = this.shadowRoot.querySelector('[data-ai-advisor]');
     if (!advisorElement) return;
 
-    // 如果配置了 API，使用 API 生成建议，否则使用规则引擎
-    if (this.apiKey && this.apiEndpoint) {
-      this.generateAIAdviceAPI(weather, temp, wind, uv, airQuality, pollen)
-        .then(advice => {
-          advisorElement.innerHTML = advice;
-        })
-        .catch(error => {
-          console.warn('AI API call failed, falling back to rule-based advice:', error);
-          const advice = this.generateAIAdviceRules(weather, temp, wind, uv, airQuality, pollen);
-          advisorElement.innerHTML = advice;
-        });
-    } else {
-      const advice = this.generateAIAdviceRules(weather, temp, wind, uv, airQuality, pollen);
-      advisorElement.innerHTML = advice;
-    }
+    const advice = this.generateAIAdvice(weather, temp, wind, uv, airQuality, pollen);
+    advisorElement.innerHTML = advice;
   }
 
-  generateAIAdviceRules(weather, temp, wind, uv, airQuality, pollen) {
-    if (!weather) return this._t('loading');
+  generateAIAdvice(weather, temp, wind, uv, airQuality, pollen) {
+    let advice = [];
 
-    const condition = weather.state;
-    const tempValue = temp ? parseFloat(temp.state) : null;
-    const forecast = weather.attributes?.forecast || [];
-    const windSpeed = wind ? parseFloat(wind.state) : 10;
-    const uvValue = uv ? parseFloat(uv.state) : null;
-    const aqiValue = airQuality ? parseFloat(airQuality.state) : null;
+    if (temp && wind) {
+      const tempValue = parseFloat(temp.state);
+      const windValue = parseFloat(wind.state);
+      const windChill = this.calculateWindChill(tempValue, windValue);
 
-    // 检查花粉
-    let isHighPollen = false;
+      if (windChill < tempValue - 3) {
+        advice.push(`<div class="advice-item warning">🌬️ 风寒警告: 温度 ${tempValue}°C，但由于强风感觉像 ${windChill.toFixed(1)}°C</div>`);
+      }
+    }
+
+    if (uv) {
+      const uvValue = parseFloat(uv.state);
+      if (uvValue >= 8) {
+        advice.push(`<div class="advice-item danger">☀️ 紫外线危险: UV 指数 ${uvValue}，建议穿长袖、防晒霜并避免中午外出</div>`);
+      } else if (uvValue >= 6) {
+        advice.push(`<div class="advice-item warning">☀️ 紫外线高: UV 指数 ${uvValue}，建议使用防晒霜</div>`);
+      }
+    }
+
+    if (airQuality) {
+      const aqiValue = parseFloat(airQuality.state);
+      if (aqiValue > 150) {
+        advice.push(`<div class="advice-item danger">🌫️ 空气质量差: AQI ${aqiValue}，建议减少户外活动并佩戴口罩</div>`);
+      } else if (aqiValue > 100) {
+        advice.push(`<div class="advice-item warning">🌫️ 空气质量不佳: AQI ${aqiValue}，敏感人群应减少户外活动</div>`);
+      }
+    }
+
     if (pollen) {
-      const pState = pollen.state;
-      if (['high', 'very_high', 'extreme', 'red'].includes(pState.toLowerCase())) isHighPollen = true;
-      if (!isNaN(parseFloat(pState)) && parseFloat(pState) > 50) isHighPollen = true;
-    }
-
-    let msg = "";
-    let level = "normal";
-
-    // --- 优先级层次 ---
-
-    // 1. 生命危险 (风暴)
-    if (['lightning', 'lightning-rainy', 'hail'].includes(condition)) {
-      msg = this._t('alert_storm');
-      level = "danger";
-    }
-    // 2. 健康: 空气质量差
-    else if (aqiValue !== null && aqiValue > 50) {
-      if (aqiValue > 100) {
-        msg = this._t('alert_aqi_bad', {val: aqiValue});
-        level = "danger";
-      } else {
-        msg = this._t('alert_aqi_mod', {val: aqiValue});
-        level = "warning";
-      }
-    }
-    // 3. 健康: 花粉
-    else if (isHighPollen) {
-      msg = this._t('alert_pollen');
-      level = "warning";
-    }
-    // 4. 规划: 即将到来的雨雪
-    else {
-      const nextRain = forecast.slice(0, 3).find(f => ['rainy', 'pouring', 'snowy'].includes(f.condition) || (f.precipitation > 0));
-
-      // 如果3小时内要下雨
-      if (nextRain) {
-        const time = new Date(nextRain.datetime).getHours() + ":00";
-        const p = nextRain.precipitation || "~";
-        msg = nextRain.condition === 'snowy'
-          ? this._t('advice_snow_soon', {time})
-          : this._t('advice_rain_soon', {time, val: p});
-        level = "warning";
-      }
-      // 5. 当前天气
-      else if (['rainy', 'pouring'].includes(condition)) {
-        msg = this._t('advice_rain_now', {val: weather.attributes?.precipitation || "~"});
-        level = "warning";
-      }
-      else if (['snowy', 'snowy-rainy'].includes(condition)) {
-        msg = this._t('advice_snow_now');
-        level = "warning";
-      }
-      // 6. 紫外线 (夏季)
-      else if (uvValue !== null && uvValue > 6) {
-        msg = this._t('alert_uv_high', {val: uvValue});
-        level = "warning";
-      }
-      // 7. 温度 + 风 (冬季)
-      else if (tempValue !== null && tempValue < 10 && windSpeed > 20) {
-        // 又冷又刮风 - 风寒效应
-        msg = this._t('advice_cold_wind', {val: tempValue});
-      }
-      else if (tempValue !== null && tempValue < 5) {
-        msg = this._t('advice_cold', {val: tempValue});
-      } else if (tempValue !== null && tempValue > 28) {
-        msg = this._t('advice_hot', {val: tempValue});
-        level = "warning";
-      }
-      // 8. 稳定
-      else if (tempValue !== null) {
-        msg = this._t('advice_nice', {val: tempValue});
+      const pollenValue = parseFloat(pollen.state);
+      if (pollenValue > 50) {
+        advice.push(`<div class="advice-item warning">🌸 花粉高: 花粉浓度 ${pollenValue}，过敏人群注意防护</div>`);
       }
     }
 
-    // 如果在游戏模式且状态正常，则显示游戏模式消息
-    if (this.gamingMode && level === 'normal') {
-      msg = this._t('advice_gaming');
-    }
-
-    return msg;
-  }
-
-  // API 基础的 AI 建议生成
-  async generateAIAdviceAPI(weather, temp, wind, uv, airQuality, pollen) {
-    // API 调用节流（每30秒最多一次）
-    const now = Date.now();
-    if (now - this.lastApiCall < 30000) {
-      return this._t('loading');
-    }
-    this.lastApiCall = now;
-
-    // 构建缓存键
-    const cacheKey = this.buildCacheKey(weather, temp, wind, uv, airQuality, pollen);
-    if (this.aiCache.has(cacheKey)) {
-      return this.aiCache.get(cacheKey);
-    }
-
-    try {
-      const prompt = this.buildAIPrompt(weather, temp, wind, uv, airQuality, pollen);
-      const response = await this.callAIAPI(prompt);
-      const advice = this.formatAIResponse(response);
-
-      // 缓存结果（最多缓存10个结果）
-      if (this.aiCache.size >= 10) {
-        const firstKey = this.aiCache.keys().next().value;
-        this.aiCache.delete(firstKey);
+    if (weather) {
+      const condition = weather.state;
+      if (condition === 'rainy' || condition === 'pouring') {
+        advice.push(`<div class="advice-item info">🌧️ 下雨天气: 记得带伞，路面可能湿滑</div>`);
+      } else if (condition === 'snowy') {
+        advice.push(`<div class="advice-item info">❄️ 下雪天气: 注意保暖，路面可能结冰</div>`);
+      } else if (condition === 'sunny') {
+        advice.push(`<div class="advice-item info">☀️ 晴朗天气: 适合户外活动，别忘了防晒</div>`);
       }
-      this.aiCache.set(cacheKey, advice);
-
-      return advice;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  buildCacheKey(weather, temp, wind, uv, airQuality, pollen) {
-    const key = [
-      weather?.state,
-      temp?.state,
-      wind?.state,
-      uv?.state,
-      airQuality?.state,
-      pollen?.state,
-      this.lang
-    ].join('|');
-    return btoa(key); // Base64 编码作为缓存键
-  }
-
-  buildAIPrompt(weather, temp, wind, uv, airQuality, pollen) {
-    const data = {
-      weather: weather?.state || 'unknown',
-      temperature: temp ? `${temp.state}${temp.attributes?.unit_of_measurement || '°C'}` : 'unknown',
-      humidity: this.hass.states[this.config.humidity_entity]?.state || 'unknown',
-      wind: wind ? `${wind.state} m/s` : 'unknown',
-      uv: uv ? uv.state : 'unknown',
-      airQuality: airQuality ? airQuality.state : 'unknown',
-      pollen: pollen ? pollen.state : 'unknown',
-      forecast: weather?.attributes?.forecast?.slice(0, 3) || [],
-      time: new Date().toLocaleTimeString(this.lang === 'zh' ? 'zh-CN' : 'en-US')
-    };
-
-    const language = this.lang === 'zh' ? '中文' : 'English';
-
-    return `You are an intelligent weather assistant. Based on the current weather data, provide a helpful, concise advice in ${language}. Consider safety, health, and daily activities.
-
-Current weather data:
-- Weather condition: ${data.weather}
-- Temperature: ${data.temperature}
-- Humidity: ${data.humidity}%
-- Wind speed: ${data.wind}
-- UV index: ${data.uv}
-- Air quality (AQI): ${data.airQuality}
-- Pollen level: ${data.pollen}
-- Time: ${data.time}
-
-${data.forecast.length > 0 ? `Next few hours forecast: ${data.forecast.map(f => `${f.condition} at ${new Date(f.datetime).getHours()}:00`).join(', ')}` : ''}
-
-Provide advice in this format:
-- Start with an emoji that represents the overall situation
-- Give 1-2 sentences of practical advice
-- Keep it under 100 characters
-- Use ${language} language
-
-Examples:
-English: "🌧️ Bring an umbrella - rain expected in 2 hours"
-Chinese: "🌧️ 预计2小时后下雨，请带伞出行"
-
-Your advice:`;
-  }
-
-  async callAIAPI(prompt) {
-    const response = await fetch(this.apiEndpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.apiKey}`
-      },
-      body: JSON.stringify({
-        model: this.apiModel,
-        messages: [
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        max_tokens: 150,
-        temperature: 0.7
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`API request failed: ${response.status}`);
     }
 
-    const data = await response.json();
-    return data.choices[0]?.message?.content?.trim() || 'Unable to generate advice';
-  }
-
-  formatAIResponse(response) {
-    // 清理和格式化 API 响应
-    let cleanResponse = response.replace(/^["']|["']$/g, ''); // 移除引号
-    cleanResponse = cleanResponse.replace(/\n/g, ' '); // 移除换行符
-
-    // 根据语言确定样式类
-    const level = this.determineAdviceLevel(cleanResponse);
-
-    return `<div class="advice-item ${level}">${cleanResponse}</div>`;
-  }
-
-  determineAdviceLevel(advice) {
-    const dangerKeywords = ['danger', 'warning', 'alert', 'storm', 'thunder', '⚠️', '危险', '警报', '风暴'];
-    const warningKeywords = ['caution', 'careful', '注意', '小心', '🌧️', '🌨️', '☀️', '🥶', '🔥'];
-
-    const lowerAdvice = advice.toLowerCase();
-
-    if (dangerKeywords.some(keyword => lowerAdvice.includes(keyword.toLowerCase()))) {
-      return 'danger';
-    } else if (warningKeywords.some(keyword => lowerAdvice.includes(keyword.toLowerCase()))) {
-      return 'warning';
-    } else {
-      return 'info';
-    }
+    return advice.length > 0 ? advice.join('') : '<div class="advice-item info">✅ 天气状况良好，适合正常活动</div>';
   }
 
   calculateWindChill(temp, windSpeed) {
@@ -763,41 +505,35 @@ Your advice:`;
           </div>
 
           <div class="metrics-grid">
-            ${this.displayHumidity ? `
-              <div class="metric-card">
-                <div class="metric-label">湿度</div>
-                <div class="metric-value" data-humidity>--%</div>
-                <div class="metric-icon">💧</div>
-              </div>` : ''}
+            <div class="metric-card">
+              <div class="metric-label">湿度</div>
+              <div class="metric-value" data-humidity>--%</div>
+              <div class="metric-icon">💧</div>
+            </div>
 
-            ${this.displayAirQuality ? `
-              <div class="metric-card">
-                <div class="metric-label">空气质量</div>
-                <div class="metric-value" data-air-quality>--</div>
-                <div class="metric-icon">🌬️</div>
-              </div>` : ''}
+            <div class="metric-card">
+              <div class="metric-label">空气质量</div>
+              <div class="metric-value" data-air-quality>--</div>
+              <div class="metric-icon">🌬️</div>
+            </div>
 
-            ${this.displayWind ? `
-              <div class="metric-card">
-                <div class="metric-label">风速</div>
-                <div class="metric-value" data-wind>-- m/s</div>
-                <div class="metric-icon">🌪️</div>
-              </div>` : ''}
+            <div class="metric-card">
+              <div class="metric-label">风速</div>
+              <div class="metric-value" data-wind>-- m/s</div>
+              <div class="metric-icon">🌪️</div>
+            </div>
 
-            ${this.displayUV ? `
-              <div class="metric-card">
-                <div class="metric-label">紫外线</div>
-                <div class="metric-value" data-uv>--</div>
-                <div class="metric-icon">☀️</div>
-              </div>` : ''}
+            <div class="metric-card">
+              <div class="metric-label">紫外线</div>
+              <div class="metric-value" data-uv>--</div>
+              <div class="metric-icon">☀️</div>
+            </div>
 
-            ${this.displayPollen ? `
-              <div class="metric-card">
-                <div class="metric-label">花粉</div>
-                <div class="metric-value" data-pollen>--</div>
-                <div class="metric-icon">🌸</div>
-              </div>` : ''}
-          </div>
+            <div class="metric-card">
+              <div class="metric-label">花粉</div>
+              <div class="metric-value" data-pollen>--</div>
+              <div class="metric-icon">🌸</div>
+            </div>
 
           <div class="house-section">
             <div class="house-container">
@@ -1295,14 +1031,6 @@ Your advice:`;
   static getStubConfig() {
     return {
       language: "zh", // 支持 "en" 或 "zh"
-      api_key: '', // 用户提供的 API Key
-      api_endpoint: 'https://api.openai.com/v1/chat/completions', // API 端点
-      api_model: 'gpt-3.5-turbo', // API 模型
-      display_humidity: true,
-      display_air_quality: true,
-      display_wind: true,
-      display_uv: true,
-      display_pollen: true,
       title: '气候监控',
       weather_entity: 'weather.home',
       temperature_entity: 'sensor.living_room_temperature',
